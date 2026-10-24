@@ -14,7 +14,10 @@ required = [
     'src/app/api/admin/orders/route.ts',
     'src/lib/store.ts', 'src/lib/auth.ts', 'src/lib/commerce.ts',
     'src/lib/orders.ts', 'src/lib/payments.ts', 'src/lib/paystack.ts',
-    'supabase/schema.sql', '.env.example'
+    'src/app/api/mcp/route.ts', 'src/lib/chord-commerce.ts',
+    'supabase/schema.sql', 'supabase/chord-phase2.sql',
+    'chord-skill/SKILL.md', 'chord-skill/references/merchant-policy.md',
+    '.env.example'
 ]
 for relative in required:
     assert (root / relative).is_file(), f'Missing {relative}'

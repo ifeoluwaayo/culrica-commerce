@@ -10,13 +10,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.0",
+    "@modelcontextprotocol/server": "^2",
+    "@supabase/supabase-js": "^2.118.0",
     "lucide-react": "^0.468.0",
+    "mcp-handler": "^2",
     "motion": "^14.6.0",
     "next": "^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "zod": "^4.1.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
