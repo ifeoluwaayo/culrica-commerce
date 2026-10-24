@@ -109,5 +109,21 @@
       "orderId": null,
       "createdAt": "2026-10-24T00:00:00.000Z"
     }
+  ],
+  "tickets": [
+    {
+      "id": "t1111111-cda4-4da4-a747-022345ecd001",
+      "ticketReference": "SUP-7B9A2F41D83E",
+      "customerEmail": "buyer01@example.com",
+      "orderId": "o1111111-cda4-4da4-a747-022345ecd001",
+      "orderReference": "CUL-7K9M2W4P",
+      "category": "delivery_question",
+      "issueText": "Customer is asking about the estimated dispatch window for Lagos wholesale hibiscus delivery (Warehouse Bay 2).",
+      "status": "open",
+      "createdAt": "2026-10-24T14:30:00.000Z",
+      "updatedAt": "2026-10-24T14:30:00.000Z"
+    }
   ]
 }
+
+

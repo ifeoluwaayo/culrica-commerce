@@ -18,14 +18,20 @@ import {
   CircleAlert,
   CirclePlus,
   Clock,
+  Copy,
+  ExternalLink,
   Eye,
   EyeOff,
+  Headphones,
   History,
   LayoutDashboard,
   Leaf,
+  LifeBuoy,
   LogOut,
+  Mail,
   MapPin,
   Menu,
+  MessageSquare,
   Package,
   Pencil,
   Plus,
@@ -57,21 +63,42 @@ import {
   type Order,
   type OrderStatus,
   type PaymentStatus,
+  type SupportTicket,
+  type TicketCategory,
+  type TicketStatus,
   couponState,
   reasonLabel,
   statusLabel,
-  paymentLabel
+  paymentLabel,
+  ticketCategoryLabels,
+  ticketStatusLabels
 } from "@/lib/commerce";
 
-type Tab = "overview" | "products" | "inventory" | "orders" | "coupons";
+type Tab = "overview" | "products" | "inventory" | "orders" | "coupons" | "support";
 
 type Props = {
   initialProducts: Product[];
   initialCoupons: Coupon[];
   initialOrders: Order[];
   initialMovements: InventoryMovement[];
+  initialTickets?: SupportTicket[];
   storage: string;
 };
+
+function formatDate(iso?: string | null) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch {
+    return String(iso);
+  }
+}
 
 const blankProduct: ProductInput = {
   sku: "",
@@ -105,6 +132,7 @@ export function AdminDashboard({
   initialCoupons,
   initialOrders,
   initialMovements,
+  initialTickets,
   storage
 }: Props) {
   const router = useRouter();
@@ -115,6 +143,7 @@ export function AdminDashboard({
   const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [movements, setMovements] = useState<InventoryMovement[]>(initialMovements);
+  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets ?? []);
 
   // Filter & Search states
   const [productSearch, setProductSearch] = useState("");
@@ -124,6 +153,12 @@ export function AdminDashboard({
   const [orderStatusFilter, setOrderStatusFilter] = useState("All");
 
   const [couponSearch, setCouponSearch] = useState("");
+
+  const [ticketSearch, setTicketSearch] = useState("");
+  const [ticketStatusFilter, setTicketStatusFilter] = useState<string>("all");
+  const [ticketCategoryFilter, setTicketCategoryFilter] = useState<string>("all");
+  const [updatingTicketId, setUpdatingTicketId] = useState<string | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
 
   // Modals & Forms states
   const [productModal, setProductModal] = useState<Product | null | "new">(null);
@@ -165,6 +200,10 @@ export function AdminDashboard({
     const pendingOrdersCount = orders.filter((o) => o.status === "pending").length;
     const activeCouponsCount = coupons.filter((c) => couponState(c) === "active").length;
 
+    const openTicketsCount = tickets.filter((t) => t.status === "open").length;
+    const inProgressTicketsCount = tickets.filter((t) => t.status === "in_progress").length;
+    const resolvedTicketsCount = tickets.filter((t) => t.status === "resolved").length;
+
     return {
       totalProducts: products.length,
       activeProducts: products.filter((p) => p.isActive).length,
@@ -174,9 +213,13 @@ export function AdminDashboard({
       totalOrders: orders.length,
       pendingOrdersCount,
       totalRevenue,
-      activeCouponsCount
+      activeCouponsCount,
+      openTicketsCount,
+      inProgressTicketsCount,
+      resolvedTicketsCount
     };
-  }, [products, orders, coupons]);
+  }, [products, orders, coupons, tickets]);
+
 
   // Notifications helper
   const showNotice = (msg: string) => {
@@ -189,7 +232,50 @@ export function AdminDashboard({
     setNotice("");
   };
 
+  /* ----------------- SUPPORT TICKET HELPERS ----------------- */
+
+  const filteredTickets = useMemo(() => {
+    return tickets.filter((t) => {
+      const term = ticketSearch.toLowerCase().trim();
+      const matchSearch =
+        !term ||
+        t.ticketReference.toLowerCase().includes(term) ||
+        t.customerEmail.toLowerCase().includes(term) ||
+        t.issueText.toLowerCase().includes(term) ||
+        (t.orderReference && t.orderReference.toLowerCase().includes(term));
+
+      const matchStatus = ticketStatusFilter === "all" || t.status === ticketStatusFilter;
+      const matchCategory = ticketCategoryFilter === "all" || t.category === ticketCategoryFilter;
+
+      return matchSearch && matchStatus && matchCategory;
+    });
+  }, [tickets, ticketSearch, ticketStatusFilter, ticketCategoryFilter]);
+
+  async function handleTicketStatusChange(ticketId: string, newStatus: TicketStatus) {
+    setUpdatingTicketId(ticketId);
+    try {
+      const res = await fetch(`/api/admin/support/${ticketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unable to update ticket");
+      const updated = data.ticket as SupportTicket;
+      setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      if (selectedTicket?.id === updated.id) {
+        setSelectedTicket(updated);
+      }
+      showNotice(`Ticket ${updated.ticketReference} marked as ${ticketStatusLabels[newStatus]}.`);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Failed to update ticket status");
+    } finally {
+      setUpdatingTicketId(null);
+    }
+  }
+
   /* ----------------- PRODUCT MUTATIONS ----------------- */
+
 
   function openProductEditor(p?: Product) {
     setError("");
@@ -545,7 +631,8 @@ export function AdminDashboard({
               { id: "products", label: "Produce Catalogue", icon: Package, badge: products.length },
               { id: "inventory", label: "Inventory & Stock", icon: Boxes, badge: stats.lowStockCount ? `${stats.lowStockCount} low` : null },
               { id: "orders", label: "Orders & Dispatch", icon: ShoppingBag, badge: stats.pendingOrdersCount ? `${stats.pendingOrdersCount} new` : null },
-              { id: "coupons", label: "Coupons & Discounts", icon: Tag, badge: coupons.length }
+              { id: "coupons", label: "Coupons & Discounts", icon: Tag, badge: coupons.length },
+              { id: "support", label: "Customer Support", icon: LifeBuoy, badge: stats.openTicketsCount ? `${stats.openTicketsCount} open` : null }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -634,7 +721,7 @@ export function AdminDashboard({
                 Workspace <span className="mx-1.5 text-gray-300">/</span> {activeTab}
               </span>
               <p className="text-sm font-bold text-[#101c14] capitalize">
-                {activeTab === "overview" ? "Merchant Overview & Metrics" : activeTab}
+                {activeTab === "overview" ? "Merchant Overview & Metrics" : activeTab === "support" ? "Customer Support & Inquiries" : activeTab}
               </p>
             </div>
           </div>
@@ -734,7 +821,7 @@ export function AdminDashboard({
               )}
 
               {/* Stat Cards Grid */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 {[
                   {
                     label: "Wholesale Revenue",
@@ -763,6 +850,13 @@ export function AdminDashboard({
                     sub: `${coupons.length} total codes configured`,
                     icon: Tag,
                     color: "bg-purple-50 text-purple-800"
+                  },
+                  {
+                    label: "Support Tickets",
+                    value: stats.openTicketsCount,
+                    sub: `${tickets.length} total (${stats.resolvedTicketsCount} resolved)`,
+                    icon: LifeBuoy,
+                    color: stats.openTicketsCount > 0 ? "bg-amber-50 text-amber-800" : "bg-teal-50 text-teal-800"
                   }
                 ].map((s) => {
                   const Icon = s.icon;
@@ -1449,6 +1543,281 @@ export function AdminDashboard({
                         <tr>
                           <td colSpan={7} className="py-12 text-center text-xs text-[#8e9c90]">
                             No coupons match your search.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* SUPPORT TICKETS TAB                                            */}
+          {/* ============================================================== */}
+          {activeTab === "support" && (
+            <div className="space-y-6">
+              {/* Header + Quick Stats */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e8f5ee] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#069f7d]">
+                      <Headphones size={12} />
+                      Customer Resolution Desk
+                    </span>
+                    <span className="text-xs text-[#6e7a70]">
+                      Chord MCP &amp; Storefront Inquiries
+                    </span>
+                  </div>
+                  <h2 className="font-serif-custom text-2xl sm:text-3xl font-bold text-[#101c14] tracking-tight mt-1">
+                    Customer Support Tickets
+                  </h2>
+                  <p className="text-xs text-[#6e7a70] mt-0.5">
+                    Monitor disputes, order lookups, and support tickets created through Ada (Chord teammate) or direct customer touchpoints.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-xl border border-[#e4dfd3] bg-white px-3 py-1.5 text-xs text-[#526054]">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Live Desk: <strong>{stats.openTicketsCount}</strong> open inquiry{stats.openTicketsCount === 1 ? "" : "ies"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters & Search Toolbar */}
+              <div className="rounded-2xl border border-[#e4dfd3] bg-white p-4 shadow-xs space-y-4">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
+                  {/* Status Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(
+                      [
+                        { id: "all", label: "All Tickets", count: tickets.length },
+                        { id: "open", label: "Open", count: stats.openTicketsCount },
+                        { id: "in_progress", label: "In Progress", count: stats.inProgressTicketsCount },
+                        { id: "resolved", label: "Resolved", count: stats.resolvedTicketsCount },
+                      ] as const
+                    ).map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setTicketStatusFilter(f.id as any)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          ticketStatusFilter === f.id
+                            ? "bg-[#143522] text-[#f7f6f2] shadow-xs"
+                            : "bg-[#f4f2ea] text-[#526054] hover:bg-[#eae6db]"
+                        }`}
+                      >
+                        {f.label} ({f.count})
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Category Filter + Search Input */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <select
+                      className="rounded-xl border border-[#d8d3c5] bg-[#faf9f5] px-3 py-2 text-xs text-[#101c14] focus:outline-none focus:ring-2 focus:ring-[#069f7d]/30"
+                      value={ticketCategoryFilter}
+                      onChange={(e) => setTicketCategoryFilter(e.target.value as any)}
+                    >
+                      <option value="all">All Categories</option>
+                      <option value="order_issue">Order Issue</option>
+                      <option value="payment_issue">Payment Issue</option>
+                      <option value="delivery_question">Delivery &amp; Logistics</option>
+                      <option value="product_question">Product Sourcing</option>
+                      <option value="coupon_issue">Coupon &amp; Rebate</option>
+                      <option value="other">General Inquiry</option>
+                    </select>
+
+                    <div className="relative min-w-[260px]">
+                      <Search
+                        size={14}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8e9c90]"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Search ref, customer, order, notes..."
+                        value={ticketSearch}
+                        onChange={(e) => setTicketSearch(e.target.value)}
+                        className="w-full rounded-xl border border-[#d8d3c5] bg-[#faf9f5] pl-8 pr-7 py-2 text-xs text-[#101c14] placeholder-[#8e9c90] focus:outline-none focus:ring-2 focus:ring-[#069f7d]/30"
+                      />
+                      {ticketSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setTicketSearch("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8e9c90] hover:text-[#101c14]"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tickets Table */}
+              <div className="rounded-2xl border border-[#e4dfd3] bg-white shadow-xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="border-b border-[#eeeae0] bg-[#faf9f5] text-[11px] font-bold uppercase tracking-wider text-[#6e7a70]">
+                      <tr>
+                        <th className="px-5 py-3.5">Ticket Ref</th>
+                        <th className="px-4 py-3.5">Customer</th>
+                        <th className="px-4 py-3.5">Category</th>
+                        <th className="px-4 py-3.5">Summary / Issue</th>
+                        <th className="px-4 py-3.5">Linked Order</th>
+                        <th className="px-4 py-3.5">Created</th>
+                        <th className="px-4 py-3.5">Status</th>
+                        <th className="px-5 py-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#eeeae0]">
+                      {filteredTickets.map((t) => {
+                        const isUpdating = updatingTicketId === t.id;
+                        return (
+                          <tr
+                            key={t.id}
+                            className="hover:bg-[#faf9f5]/70 transition cursor-pointer"
+                            onClick={() => setSelectedTicket(t)}
+                          >
+                            {/* Ticket Reference */}
+                            <td className="px-5 py-4 font-mono font-bold text-[#143522]">
+                              <div className="flex items-center gap-1.5">
+                                <span className="rounded-md bg-[#edf3ef] px-2 py-0.5 text-[11px] text-[#143522] border border-[#d2ded6]">
+                                  {t.ticketReference}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Customer Email */}
+                            <td className="px-4 py-4 text-[#101c14]">
+                              <div className="flex items-center gap-1.5 font-medium">
+                                <Mail size={12} className="text-[#8e9c90] shrink-0" />
+                                <span className="truncate max-w-[170px]" title={t.customerEmail}>
+                                  {t.customerEmail}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Category */}
+                            <td className="px-4 py-4">
+                              <span
+                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border ${
+                                  t.category === "payment_issue"
+                                    ? "bg-rose-50 text-rose-800 border-rose-200"
+                                    : t.category === "order_issue"
+                                    ? "bg-sky-50 text-sky-800 border-sky-200"
+                                    : t.category === "delivery_question"
+                                    ? "bg-amber-50 text-amber-800 border-amber-200"
+                                    : t.category === "product_question"
+                                    ? "bg-purple-50 text-purple-800 border-purple-200"
+                                    : t.category === "coupon_issue"
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                    : "bg-zinc-100 text-zinc-700 border-zinc-200"
+                                }`}
+                              >
+                                {ticketCategoryLabels[t.category] || t.category}
+                              </span>
+                            </td>
+
+                            {/* Issue Text */}
+                            <td className="px-4 py-4 text-[#526054] max-w-[280px]">
+                              <p className="line-clamp-2 leading-relaxed text-[11px]">
+                                {t.issueText}
+                              </p>
+                            </td>
+
+                            {/* Linked Order */}
+                            <td className="px-4 py-4">
+                              {t.orderReference ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTab("orders");
+                                    setOrderStatusFilter("All");
+                                    setOrderSearch(t.orderReference || "");
+                                  }}
+                                  className="font-mono text-[11px] font-semibold text-[#069f7d] hover:underline inline-flex items-center gap-1"
+                                  title="Filter orders tab for this order"
+                                >
+                                  {t.orderReference}
+                                  <ExternalLink size={10} />
+                                </button>
+                              ) : (
+                                <span className="text-[#b0a999]">—</span>
+                              )}
+                            </td>
+
+                            {/* Created At */}
+                            <td className="px-4 py-4 text-[11px] text-[#6e7a70] whitespace-nowrap">
+                              {formatDate(t.createdAt)}
+                            </td>
+
+                            {/* Status Selector */}
+                            <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                              <div className="relative inline-block">
+                                <select
+                                  disabled={isUpdating}
+                                  value={t.status}
+                                  onChange={(e) =>
+                                    handleTicketStatusChange(t.id, e.target.value as TicketStatus)
+                                  }
+                                  className={`rounded-lg px-2.5 py-1 text-[11px] font-bold border transition cursor-pointer focus:outline-none focus:ring-1 focus:ring-offset-1 ${
+                                    t.status === "open"
+                                      ? "bg-amber-50 text-amber-800 border-amber-300 focus:ring-amber-500"
+                                      : t.status === "in_progress"
+                                      ? "bg-blue-50 text-blue-800 border-blue-300 focus:ring-blue-500"
+                                      : t.status === "resolved"
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 focus:ring-emerald-500"
+                                      : "bg-gray-100 text-gray-700 border-gray-300 focus:ring-gray-500"
+                                  } ${isUpdating ? "opacity-50" : ""}`}
+                                >
+                                  <option value="open">Open</option>
+                                  <option value="in_progress">In Progress</option>
+                                  <option value="resolved">Resolved</option>
+                                </select>
+                              </div>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTicket(t)}
+                                  className="rounded-lg border border-[#d8d3c5] bg-[#faf9f5] px-2.5 py-1 text-[11px] font-semibold text-[#143522] hover:bg-[#eeeae0] transition"
+                                >
+                                  View Details
+                                </button>
+                                <a
+                                  href={`mailto:${t.customerEmail}?subject=Support Ticket ${t.ticketReference} - Culrica Commerce`}
+                                  className="rounded-lg border border-[#d8d3c5] bg-[#faf9f5] p-1.5 text-[#526054] hover:text-[#069f7d] hover:bg-[#eeeae0] transition"
+                                  title="Email customer"
+                                >
+                                  <Mail size={13} />
+                                </a>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {filteredTickets.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="py-16 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-2">
+                              <LifeBuoy size={28} className="text-[#8e9c90]" />
+                              <p className="text-sm font-semibold text-[#101c14]">
+                                No customer support tickets found
+                              </p>
+                              <p className="text-xs text-[#8e9c90] max-w-sm">
+                                {ticketSearch || ticketStatusFilter !== "all" || ticketCategoryFilter !== "all"
+                                  ? "Try loosening your search query or filters to see more tickets."
+                                  : "Support inquiries received via Ada or the customer desk will appear here automatically."}
+                              </p>
+                            </div>
                           </td>
                         </tr>
                       )}
@@ -2216,6 +2585,236 @@ export function AdminDashboard({
                 <button
                   type="button"
                   onClick={() => setViewOrder(null)}
+                  className="btn-outline px-5 py-2 text-xs font-bold"
+                >
+                  Close Window
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ------------------- DRAWER: SUPPORT TICKET DETAILS ------------------- */}
+      <AnimatePresence>
+        {selectedTicket !== null && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedTicket(null)}
+              className="fixed inset-0 bg-[#0d2417]/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="relative z-10 flex h-full w-full max-w-[580px] flex-col bg-[#fcfbfa] shadow-2xl"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between border-b border-[#e4dfd3] px-7 py-5 bg-white">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="eyebrow text-[#069f7d]">Support Ticket</span>
+                    <span
+                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border ${
+                        selectedTicket.status === "open"
+                          ? "bg-amber-50 text-amber-800 border-amber-300"
+                          : selectedTicket.status === "in_progress"
+                          ? "bg-blue-50 text-blue-800 border-blue-300"
+                          : selectedTicket.status === "resolved"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                          : "bg-gray-100 text-gray-700 border-gray-300"
+                      }`}
+                    >
+                      {ticketStatusLabels[selectedTicket.status]}
+                    </span>
+                  </div>
+                  <h3 className="font-mono text-xl font-bold text-[#101c14] mt-0.5">
+                    {selectedTicket.ticketReference}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicket(null)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2ded4] text-[#6e7a70] hover:text-[#101c14] transition"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Drawer Body */}
+              <div className="flex-1 overflow-y-auto p-7 space-y-6">
+                {/* Status Switcher Actions */}
+                <div className="rounded-2xl border border-[#e4dfd3] bg-white p-4 space-y-3 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#101c14]">Update Ticket Status</span>
+                    {updatingTicketId === selectedTicket.id && (
+                      <span className="text-[11px] text-[#069f7d] flex items-center gap-1 font-semibold">
+                        <RefreshCw size={11} className="animate-spin" /> Saving...
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      disabled={updatingTicketId === selectedTicket.id || selectedTicket.status === "open"}
+                      onClick={() => handleTicketStatusChange(selectedTicket.id, "open")}
+                      className={`rounded-xl py-2 px-3 text-xs font-bold border transition text-center ${
+                        selectedTicket.status === "open"
+                          ? "bg-amber-100 text-amber-900 border-amber-300 shadow-xs"
+                          : "bg-[#faf9f5] text-[#526054] border-[#e4dfd3] hover:bg-[#eeeae0]"
+                      }`}
+                    >
+                      Mark Open
+                    </button>
+                    <button
+                      type="button"
+                      disabled={updatingTicketId === selectedTicket.id || selectedTicket.status === "in_progress"}
+                      onClick={() => handleTicketStatusChange(selectedTicket.id, "in_progress")}
+                      className={`rounded-xl py-2 px-3 text-xs font-bold border transition text-center ${
+                        selectedTicket.status === "in_progress"
+                          ? "bg-blue-100 text-blue-900 border-blue-300 shadow-xs"
+                          : "bg-[#faf9f5] text-[#526054] border-[#e4dfd3] hover:bg-[#eeeae0]"
+                      }`}
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      type="button"
+                      disabled={updatingTicketId === selectedTicket.id || selectedTicket.status === "resolved"}
+                      onClick={() => handleTicketStatusChange(selectedTicket.id, "resolved")}
+                      className={`rounded-xl py-2 px-3 text-xs font-bold border transition text-center ${
+                        selectedTicket.status === "resolved"
+                          ? "bg-emerald-100 text-emerald-900 border-emerald-300 shadow-xs"
+                          : "bg-[#faf9f5] text-[#526054] border-[#e4dfd3] hover:bg-[#eeeae0]"
+                      }`}
+                    >
+                      Mark Resolved
+                    </button>
+                  </div>
+                </div>
+
+                {/* Customer & Ticket Metadata */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-[#e4dfd3] bg-white p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#6e7a70]">
+                      Customer Email
+                    </p>
+                    <p className="mt-1 font-semibold text-xs text-[#101c14] truncate" title={selectedTicket.customerEmail}>
+                      {selectedTicket.customerEmail}
+                    </p>
+                    <a
+                      href={`mailto:${selectedTicket.customerEmail}?subject=Update on Ticket ${selectedTicket.ticketReference} - Culrica Commerce`}
+                      className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#069f7d] hover:underline"
+                    >
+                      <Mail size={12} />
+                      Send Email
+                    </a>
+                  </div>
+
+                  <div className="rounded-2xl border border-[#e4dfd3] bg-white p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#6e7a70]">
+                      Inquiry Category
+                    </p>
+                    <p className="mt-1 font-semibold text-xs text-[#101c14]">
+                      {ticketCategoryLabels[selectedTicket.category] || selectedTicket.category}
+                    </p>
+                    <p className="mt-1 text-[10px] text-[#8e9c90]">
+                      Filed via Chord MCP / Storefront
+                    </p>
+                  </div>
+                </div>
+
+                {/* Linked Order Section */}
+                <div className="rounded-2xl border border-[#e4dfd3] bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#6e7a70]">
+                        Linked Order
+                      </p>
+                      {selectedTicket.orderReference ? (
+                        <p className="mt-1 font-mono font-bold text-sm text-[#143522]">
+                          {selectedTicket.orderReference}
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-xs text-[#8e9c90]">
+                          No specific order reference linked to this ticket.
+                        </p>
+                      )}
+                    </div>
+                    {selectedTicket.orderReference && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const ref = selectedTicket.orderReference || "";
+                          setSelectedTicket(null);
+                          setActiveTab("orders");
+                          setOrderStatusFilter("All");
+                          setOrderSearch(ref);
+                        }}
+                        className="rounded-xl border border-[#069f7d] bg-[#e8f5ee] px-3 py-1.5 text-xs font-bold text-[#069f7d] hover:bg-[#d5eee0] transition flex items-center gap-1.5"
+                      >
+                        Find in Orders
+                        <ExternalLink size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Issue Description */}
+                <div className="rounded-2xl border border-[#e4dfd3] bg-white p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#6e7a70]">
+                      Issue Description / Request
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedTicket.issueText);
+                        showNotice("Issue text copied to clipboard.");
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6e7a70] hover:text-[#101c14]"
+                    >
+                      <Copy size={11} /> Copy
+                    </button>
+                  </div>
+                  <div className="rounded-xl border border-[#eeeae0] bg-[#faf9f5] p-4 font-sans text-xs text-[#101c14] leading-relaxed whitespace-pre-wrap">
+                    {selectedTicket.issueText}
+                  </div>
+                </div>
+
+                {/* Timestamps */}
+                <div className="rounded-2xl border border-[#eeeae0] bg-[#faf9f5] p-4 text-[11px] text-[#6e7a70] space-y-1">
+                  <div className="flex justify-between">
+                    <span>Created:</span>
+                    <span className="font-medium text-[#101c14]">{formatDate(selectedTicket.createdAt)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Last Updated:</span>
+                    <span className="font-medium text-[#101c14]">{formatDate(selectedTicket.updatedAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-5 border-t border-[#e4dfd3] bg-white flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedTicket.ticketReference);
+                    showNotice(`Ticket reference ${selectedTicket.ticketReference} copied!`);
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#526054] hover:text-[#101c14]"
+                >
+                  <Copy size={13} />
+                  Copy Reference
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicket(null)}
                   className="btn-outline px-5 py-2 text-xs font-bold"
                 >
                   Close Window

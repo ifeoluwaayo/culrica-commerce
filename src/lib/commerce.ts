@@ -164,3 +164,46 @@ export const stockAdjustmentSchema = z.object({
   reason: z.enum(manualReasons),
   note: z.string().trim().max(200).default("")
 });
+
+/* ------------------------- Customer Support ------------------------- */
+
+export const ticketCategories = [
+  "order_issue",
+  "payment_issue",
+  "delivery_question",
+  "product_question",
+  "coupon_issue",
+  "other"
+] as const;
+export type TicketCategory = (typeof ticketCategories)[number];
+
+export const ticketCategoryLabels: Record<TicketCategory, string> = {
+  order_issue: "Order Issue",
+  payment_issue: "Payment Issue",
+  delivery_question: "Delivery & Logistics",
+  product_question: "Product Sourcing",
+  coupon_issue: "Coupon & Rebate",
+  other: "General Inquiry"
+};
+
+export const ticketStatuses = ["open", "in_progress", "resolved"] as const;
+export type TicketStatus = (typeof ticketStatuses)[number];
+
+export const ticketStatusLabels: Record<TicketStatus, string> = {
+  open: "Open",
+  in_progress: "In Progress",
+  resolved: "Resolved"
+};
+
+export type SupportTicket = {
+  id: string;
+  ticketReference: string;
+  customerEmail: string;
+  orderId: string | null;
+  orderReference?: string | null;
+  category: TicketCategory;
+  issueText: string;
+  status: TicketStatus;
+  createdAt: string;
+  updatedAt: string;
+};

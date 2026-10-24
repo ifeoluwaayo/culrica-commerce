@@ -2,7 +2,8 @@ import { timingSafeEqual } from 'node:crypto';
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
 import {
-  searchProducts, quoteProduct, placeOrder, verifyOrderPayment
+  searchProducts, quoteProduct, placeOrder, verifyOrderPayment, retryOrderCheckout,
+  getOrderDetails, createSupportTicket
 } from '@/lib/chord-commerce';
 
 export const runtime = 'nodejs';
@@ -19,6 +20,32 @@ function toolFailure(error: unknown) {
 }
 
 const handler = createMcpHandler((server) => {
+  server.registerTool('get_order_details', {
+    title: 'Look up an existing Culrica order',
+    description: 'Read saved order items, totals, coupon, payment and fulfilment states after matching the order reference AND fictional buyer email. Does not update order state or provide live courier tracking.',
+    inputSchema: z.object({
+      reference: z.string().min(5).max(80),
+      customerEmail: z.string().email().max(200)
+    })
+  }, async ({ reference, customerEmail }) => {
+    try { return toolResponse(await getOrderDetails(reference, customerEmail)); }
+    catch (error) { return toolFailure(error); }
+  });
+
+  server.registerTool('create_support_ticket', {
+    title: 'Create a human-support request',
+    description: 'Save a simple fictional-customer support issue in Supabase, optionally attached to an owned order. Never claims to notify an agent, issue a refund or fix a problem.',
+    inputSchema: z.object({
+      customerEmail: z.string().email().max(200),
+      orderReference: z.string().min(5).max(80).optional(),
+      category: z.enum(['order_issue', 'payment_issue', 'delivery_question', 'product_question', 'coupon_issue', 'other']),
+      message: z.string().min(10).max(500)
+    })
+  }, async (args) => {
+    try { return toolResponse(await createSupportTicket(args)); }
+    catch (error) { return toolFailure(error); }
+  });
+
   server.registerTool('search_products', {
     title: 'Search Culrica products',
     description: 'Search the actual Culrica demo catalogue. Prices and available stock are returned by the database.',
@@ -30,13 +57,14 @@ const handler = createMcpHandler((server) => {
 
   server.registerTool('quote_product', {
     title: 'Create a real price quotation',
-    description: 'Validate stock, calculate a Lagos delivery quote and save an expiring quote. Does not create an order.',
+    description: 'Calculate a live Lagos quote and optional coupon discount from Supabase. The database validates coupon eligibility and returns the authoritative total. Does not create an order.',
     inputSchema: z.object({
       sku: z.string().min(2).max(50),
-      quantityKg: z.number().int().min(1).max(1000)
+      quantityKg: z.number().int().min(1).max(1000),
+      couponCode: z.string().max(40).optional()
     })
-  }, async ({ sku, quantityKg }) => {
-    try { return toolResponse(await quoteProduct(sku, quantityKg)); }
+  }, async ({ sku, quantityKg, couponCode }) => {
+    try { return toolResponse(await quoteProduct(sku, quantityKg, couponCode)); }
     catch (error) { return toolFailure(error); }
   });
 
@@ -54,6 +82,18 @@ const handler = createMcpHandler((server) => {
     })
   }, async (args) => {
     try { return toolResponse(await placeOrder(args)); }
+    catch (error) { return toolFailure(error); }
+  });
+
+  server.registerTool('retry_order_checkout', {
+    title: 'Recover an existing unpaid order checkout',
+    description: 'Use order reference and demo buyer email to recover an existing checkout safely. NEVER creates a new order. If Paystack already initialized the reference but the URL is lost, stops for manual review.',
+    inputSchema: z.object({
+      reference: z.string().min(5).max(80),
+      customerEmail: z.string().email().max(200)
+    })
+  }, async ({ reference, customerEmail }) => {
+    try { return toolResponse(await retryOrderCheckout(reference, customerEmail)); }
     catch (error) { return toolFailure(error); }
   });
 

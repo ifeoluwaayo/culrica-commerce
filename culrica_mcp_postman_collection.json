@@ -1,0 +1,381 @@
+{
+  "info": {
+    "_postman_id": "culrica-chord-mcp-phase2",
+    "name": "Culrica Commerce & Chord MCP (Phase 2.2)",
+    "description": "Complete Postman collection for testing the Culrica remote Streamable HTTP MCP server (all 7 tools) and admin support tickets API on localhost and production.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "mcpToken",
+      "value": "0c406b6ada3cade807b977af31a79419a67b7ca4ebd33efd54f4cb3b7b4b86fd",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. MCP Protocol Discovery",
+      "item": [
+        {
+          "name": "MCP: Initialize",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "MCP: List Tools (tools/list)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. MCP Commerce Tools",
+      "item": [
+        {
+          "name": "Tool: search_products",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"search_products\",\n    \"arguments\": {\n      \"query\": \"ginger\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "Tool: quote_product (with optional coupon)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 4,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"quote_product\",\n    \"arguments\": {\n      \"sku\": \"GIN-DRY\",\n      \"quantityKg\": 2,\n      \"couponCode\": \"WELCOME10\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "Tool: place_order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 5,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"place_order\",\n    \"arguments\": {\n      \"quoteId\": \"PASTE_QUOTE_ID_HERE\",\n      \"customerName\": \"Amina Bello\",\n      \"customerEmail\": \"buyer01@example.com\",\n      \"customerPhone\": \"+2348012345678\",\n      \"shippingAddress\": \"12 Adeola Odeku St, Victoria Island\",\n      \"shippingCity\": \"Lagos\",\n      \"shippingState\": \"Lagos\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "Tool: retry_order_checkout (recovery)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 6,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"retry_order_checkout\",\n    \"arguments\": {\n      \"reference\": \"CHD-9F7EEA836618461F\",\n      \"customerEmail\": \"buyer01@example.com\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "Tool: verify_order_payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 7,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"verify_order_payment\",\n    \"arguments\": {\n      \"reference\": \"CHD-9F7EEA836618461F\",\n      \"customerEmail\": \"buyer01@example.com\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. MCP Support & Lookup Tools (Phase 2.2)",
+      "item": [
+        {
+          "name": "Tool: get_order_details (read-only order lookup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 8,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_order_details\",\n    \"arguments\": {\n      \"reference\": \"CHD-9F7EEA836618461F\",\n      \"customerEmail\": \"buyer01@example.com\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        },
+        {
+          "name": "Tool: create_support_ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mcpToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 9,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"create_support_ticket\",\n    \"arguments\": {\n      \"customerEmail\": \"buyer01@example.com\",\n      \"category\": \"payment_issue\",\n      \"message\": \"My bank debited me for order CHD-9F7EEA836618461F, but the order status still shows unpaid. Please assist.\",\n      \"orderReference\": \"CHD-9F7EEA836618461F\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mcp"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Storefront & Admin APIs",
+      "item": [
+        {
+          "name": "GET /api/products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "POST /api/auth/login (Admin Login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Origin",
+                "value": "{{baseUrl}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "GET /api/admin/support (List Support Tickets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/support",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "support"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -37,7 +37,7 @@ const dataDir = path.join(process.cwd(), "data");
 const productsFile = path.join(dataDir, "products.json");
 const commerceFile = path.join(dataDir, "commerce.json");
 
-export type LocalCommerce = { coupons: Coupon[]; orders: Order[]; movements: InventoryMovement[] };
+export type LocalCommerce = { coupons: Coupon[]; orders: Order[]; movements: InventoryMovement[]; tickets: import("./commerce").SupportTicket[] };
 
 async function readJson<T>(file: string, seed: T): Promise<T> {
   try { return JSON.parse(await fs.readFile(file, "utf8")) as T; }
@@ -57,7 +57,8 @@ async function writeJson(file: string, value: unknown) {
 
 export const readLocal = () => readJson<Product[]>(productsFile, seededProducts);
 export const writeLocal = (items: Product[]) => writeJson(productsFile, items);
-export const readCommerce = () => readJson<LocalCommerce>(commerceFile, { coupons: [], orders: [], movements: [] });
+export const readCommerce = () => readJson<LocalCommerce>(commerceFile, { coupons: [], orders: [], movements: [], tickets: [] });
+
 export const writeCommerce = (value: LocalCommerce) => writeJson(commerceFile, value);
 
 // The local file adapter is for single-process development only. Supabase is mandatory in production.
