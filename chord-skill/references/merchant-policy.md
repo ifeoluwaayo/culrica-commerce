@@ -1,9 +1,11 @@
 # Culrica | Exercise Merchant Policy
 
 ## Audience and purpose
+
 Culrica is a Nigeria-based agricultural sourcing concept serving processors and wholesale buyers. The exercise uses fictional buyers and inventory. Products are sourced from the shared Supabase database, NOT this document.
 
 ## Pricing and delivery
+
 - Prices are per whole kilogram in NGN, retrieved from tools.
 - Only fictional deliveries within Lagos State can be quoted in the current exercise.
 - Delivery fee: ₦2,500 flat, imposed by the quote tool rather than guessed by the model.
@@ -11,6 +13,7 @@ Culrica is a Nigeria-based agricultural sourcing concept serving processors and 
 - No real shipping or international export quotations.
 
 ## Orders and payments
+
 - Quotes expire after 15 minutes and don't reserve stock.
 - One SKU per WhatsApp order during MVP; multi-item carts are future work.
 - Confirm total and buyer's consent before creating an order.
@@ -20,10 +23,12 @@ Culrica is a Nigeria-based agricultural sourcing concept serving processors and 
 - If a payment succeeds but stock has been exhausted, the order needs human attention.
 
 ## Examples of fictional test data
-- Buyer: Demo Buyer; email: buyer01@example.com (must be a valid routable email format for Paystack receipt & order confirmation); phone: +2348000000001
+
+- Buyer: Demo Buyer; email: buyer01@gmail.com (must be a valid routable email format for Paystack receipt & order confirmation); phone: +2348000000001
 - Delivery: 12 Example Street, Ikeja, Lagos
 
 ## Human escalation
+
 Escalate price discrepancies, double charges, successful payments without stock, refund requests and export logistics. The demo can save a support ticket in Supabase, but it does not send a live human notification or guarantee a response.
 
 ## Promotions and recovery (Phase 2.1)
@@ -34,8 +39,9 @@ Escalate price discrepancies, double charges, successful payments without stock,
 - If Paystack reports a payment session exists but the checkout URL was lost, escalate instead of initializing a competing session.
 
 ## Order lookup and FAQs (Phase 2.2)
+
 - Show saved order details only when both reference and buyer email match the same order.
-- `payment_status` is the last *recorded* state, not a fresh Paystack status check. Use `verify_order_payment` to check a disputed payment.
+- `payment_status` is the last _recorded_ state, not a fresh Paystack status check. Use `verify_order_payment` to check a disputed payment.
 - Fulfilment statuses: `pending` (not confirmed), `confirmed` (ready for fulfilment), `shipped` (marked dispatched internally), `delivered` (marked delivered internally), `cancelled` (cancelled). No live courier tracking or promised delivery dates.
 - Test checkout failures: the order remains unpaid, and `retry_order_checkout` can try recovering it safely.
 - Generic support covers supported shipping region, quote timing, coupon rules, payment status, and the fact that refunds and international delivery need operator review.
