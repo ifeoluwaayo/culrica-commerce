@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --ink: #101c14;
+    --forest: #143522;
+    --forest-dark: #0d2417;
+    --emerald-accent: #069f7d;
+    --emerald-light: #2bc59e;
+    --paper: #f9f8f4;
+    --sand: #f0ece1;
+    --sand-light: #f5f2ea;
+    --line: #e2ded4;
+    --line-subtle: #ece8de;
+    --muted: #6e7a70;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  ::selection {
+    background: #069f7d;
+    color: #ffffff;
+  }
+}
+
+/* Typography styles */
+.font-serif-custom {
+  font-family: "Times New Roman", Times, Georgia, serif;
+}
+
+.font-display {
+  font-family: "Times New Roman", Times, Georgia, serif;
+  letter-spacing: -0.04em;
+}
+
+/* Layout Utilities */
+.container-main {
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (min-width: 768px) {
+  .container-main {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-main {
+    padding-left: 56px;
+    padding-right: 56px;
+  }
+}
+
+/* UI Accents & Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--forest);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 9999px;
+  padding: 13px 24px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+  background: var(--forest-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(20, 53, 34, 0.25);
+}
+
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--emerald-accent);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 13px 24px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-accent:hover {
+  background: #05886b;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(6, 159, 125, 0.3);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 22px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--forest);
+  color: var(--forest);
+  background: #fafaf8;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.soft-shadow {
+  box-shadow: 0 20px 60px -15px rgba(16, 28, 20, 0.07);
+}
+
+.soft-shadow-lg {
+  box-shadow: 0 30px 90px -20px rgba(16, 28, 20, 0.12);
+}
+
+.field {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  padding: 10px 14px;
+  color: var(--ink);
+  outline: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.field:focus {
+  border-color: var(--emerald-accent);
+  box-shadow: 0 0 0 3px rgba(6, 159, 125, 0.15);
+}
+
+.label-form {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* Custom scrollbars for tables & modals */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Modern dialog modal overscroll behavior */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(16, 28, 20, 0.6);
+  backdrop-filter: blur(4px);
+}

@@ -1,0 +1,113 @@
+{
+  "coupons": [
+    {
+      "id": "c1111111-cda4-4da4-a747-022345ecd001",
+      "code": "HARVEST2026",
+      "description": "15% wholesale seasonal discount for food processors",
+      "discountType": "percent",
+      "discountValue": 15,
+      "minSubtotalNgn": 20000,
+      "maxRedemptions": 100,
+      "redemptions": 3,
+      "startsAt": null,
+      "endsAt": null,
+      "isActive": true,
+      "createdAt": "2026-10-24T00:00:00.000Z",
+      "updatedAt": "2026-10-24T00:00:00.000Z"
+    },
+    {
+      "id": "c1111111-cda4-4da4-a747-022345ecd002",
+      "code": "WELCOME5K",
+      "description": "₦5,000 off orders over ₦50,000",
+      "discountType": "fixed",
+      "discountValue": 5000,
+      "minSubtotalNgn": 50000,
+      "maxRedemptions": 50,
+      "redemptions": 1,
+      "startsAt": null,
+      "endsAt": null,
+      "isActive": true,
+      "createdAt": "2026-10-24T00:00:00.000Z",
+      "updatedAt": "2026-10-24T00:00:00.000Z"
+    },
+    {
+      "id": "c1111111-cda4-4da4-a747-022345ecd003",
+      "code": "CULRICA10",
+      "description": "10% off any order for new produce buyers",
+      "discountType": "percent",
+      "discountValue": 10,
+      "minSubtotalNgn": 0,
+      "maxRedemptions": null,
+      "redemptions": 0,
+      "startsAt": null,
+      "endsAt": null,
+      "isActive": true,
+      "createdAt": "2026-10-24T00:00:00.000Z",
+      "updatedAt": "2026-10-24T00:00:00.000Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "o1111111-cda4-4da4-a747-022345ecd001",
+      "reference": "CUL-7K9M2W4P",
+      "customerName": "Zobo Delight Blenders",
+      "customerEmail": "procurement@zobodelight.ng",
+      "customerPhone": "+234 803 214 9901",
+      "shippingAddress": "Plot 12 Industrial Avenue, Ikeja",
+      "shippingCity": "Ikeja",
+      "shippingState": "Lagos",
+      "notes": "Deliver to Warehouse Loading Bay 2",
+      "subtotalNgn": 85000,
+      "discountNgn": 12750,
+      "deliveryNgn": 0,
+      "totalNgn": 72250,
+      "couponCode": "HARVEST2026",
+      "status": "confirmed",
+      "paymentStatus": "paid",
+      "paymentReference": "CUL-7K9M2W4P-paystack_demo",
+      "paidAt": "2026-10-24T08:30:00.000Z",
+      "stockDeducted": true,
+      "couponRedeemed": true,
+      "createdAt": "2026-10-24T08:15:00.000Z",
+      "updatedAt": "2026-10-24T08:30:00.000Z",
+      "items": [
+        {
+          "id": "item-001",
+          "productId": "2e6d756e-cda4-4da4-a747-022345ecd001",
+          "sku": "HIB-STD",
+          "name": "Dried Hibiscus Flower",
+          "imageSrc": "/products/hibiscus.jpg",
+          "priceNgn": 8500,
+          "quantityKg": 10,
+          "lineTotalNgn": 85000
+        }
+      ]
+    }
+  ],
+  "movements": [
+    {
+      "id": "m1111111-cda4-4da4-a747-022345ecd001",
+      "productId": "2e6d756e-cda4-4da4-a747-022345ecd001",
+      "sku": "HIB-STD",
+      "productName": "Dried Hibiscus Flower",
+      "deltaKg": -10,
+      "stockAfterKg": 30,
+      "reason": "order",
+      "note": "CUL-7K9M2W4P",
+      "orderId": "o1111111-cda4-4da4-a747-022345ecd001",
+      "createdAt": "2026-10-24T08:30:00.000Z"
+    },
+    {
+      "id": "m1111111-cda4-4da4-a747-022345ecd002",
+      "productId": "2e6d756e-cda4-4da4-a747-022345ecd001",
+      "sku": "HIB-STD",
+      "productName": "Dried Hibiscus Flower",
+      "deltaKg": 40,
+      "stockAfterKg": 40,
+      "reason": "initial",
+      "note": "Northern Nigeria seasonal harvest intake",
+      "orderId": null,
+      "createdAt": "2026-10-24T00:00:00.000Z"
+    }
+  ]
+}
