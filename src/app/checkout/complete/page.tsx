@@ -29,10 +29,10 @@ export default async function CheckoutCompletePage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f9f8f4]">
+    <div className="flex min-h-screen flex-col bg-[#f3f1ea]">
       <SiteHeader />
 
-      <main className="flex-1 py-16 lg:py-24">
+      <main id="main-content" className="order-surface flex-1 py-16 lg:py-24">
         <div className="container-main max-w-[700px]">
           {order ? (
             <div className="rounded-[32px] border border-[#e2ded4] bg-white p-8 sm:p-12 shadow-xl text-center">
@@ -41,27 +41,27 @@ export default async function CheckoutCompletePage({
               </div>
 
               <span className="eyebrow text-[#069f7d]">Payment Verified · Order Placed</span>
-              <h1 className="font-serif-custom text-[32px] sm:text-[40px] font-bold text-[#101c14] mt-2">
-                Thank you for your order!
+              <h1 className="font-serif-custom text-[32px] sm:text-[40px] font-bold text-[#1e3232] mt-2">
+                Good things are on their way.
               </h1>
 
               <p className="mt-3 text-[15px] text-[#6e7a70] max-w-[480px] mx-auto leading-relaxed">
-                We have received your payment of <strong className="text-[#101c14]">{naira(order.totalNgn)}</strong>. Your order is confirmed and our dispatch depot has reserved your produce.
+                We have received your payment of <strong className="text-[#1e3232]">{naira(order.totalNgn)}</strong>. Your order is confirmed and our dispatch depot has reserved your produce.
               </p>
 
               {/* Order Reference Badge */}
-              <div className="mt-8 rounded-2xl bg-[#faf9f5] border border-[#e8e5dc] p-5 text-left space-y-3 text-xs">
+              <div className="mt-8 rounded-2xl bg-[#faf9f5] border border-[#deded5] p-5 text-left space-y-3 text-xs">
                 <div className="flex justify-between items-center border-b border-[#eeeae0] pb-3">
                   <span className="text-[#6e7a70] font-semibold">Order Reference</span>
-                  <span className="font-mono text-sm font-bold text-[#143522]">{order.reference}</span>
+                  <span className="font-mono text-sm font-bold text-[#1e3232]">{order.reference}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[#6e7a70]">Customer</span>
-                  <span className="font-bold text-[#101c14]">{order.customerName}</span>
+                  <span className="font-bold text-[#1e3232]">{order.customerName}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[#6e7a70]">Delivery Destination</span>
-                  <span className="font-medium text-[#101c14]">{order.shippingCity}, {order.shippingState}</span>
+                  <span className="font-medium text-[#1e3232]">{order.shippingCity}, {order.shippingState}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[#6e7a70]">Payment Status</span>
@@ -70,8 +70,8 @@ export default async function CheckoutCompletePage({
                   </span>
                 </div>
                 <div className="flex justify-between items-center border-t border-[#eeeae0] pt-3 text-[14px] font-bold">
-                  <span className="text-[#101c14]">Total Paid</span>
-                  <span className="text-[#143522]">{naira(order.totalNgn)}</span>
+                  <span className="text-[#1e3232]">Total Paid</span>
+                  <span className="text-[#1e3232]">{naira(order.totalNgn)}</span>
                 </div>
               </div>
 
@@ -97,7 +97,7 @@ export default async function CheckoutCompletePage({
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600 mb-5">
                 <AlertCircle size={32} />
               </div>
-              <h2 className="font-serif-custom text-2xl font-bold text-[#101c14]">
+              <h2 className="font-serif-custom text-2xl font-bold text-[#1e3232]">
                 {errorMsg || "Payment Verification Pending"}
               </h2>
               <p className="mt-2 text-sm text-[#6e7a70] max-w-[420px] mx-auto">

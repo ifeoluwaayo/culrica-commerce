@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Lock, ShieldCheck, CreditCard, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useDialog } from "@/hooks/use-dialog";
 import { useCart } from "@/context/cart-context";
 import { nigerianStates } from "@/lib/commerce";
 import { naira } from "@/lib/products";
@@ -18,6 +19,8 @@ export function CheckoutModal() {
     discountNgn,
     totalNgn
   } = useCart();
+
+  const dialogRef = useDialog(isCheckoutOpen, closeCheckout);
 
   const [form, setForm] = useState({
     name: "",
@@ -78,7 +81,7 @@ export function CheckoutModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCheckout}
-            className="fixed inset-0 bg-[#0d2417]/65 backdrop-blur-xs"
+            className="fixed inset-0 bg-[#152525]/65 backdrop-blur-xs"
           />
 
           {/* Modal Container */}
@@ -87,10 +90,15 @@ export function CheckoutModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: "spring", damping: 26, stiffness: 300 }}
-            className="relative z-10 w-full max-w-[620px] rounded-[24px] bg-[#fefefe] shadow-2xl overflow-hidden border border-[#e8e5dc] my-auto"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Delivery and checkout"
+            tabIndex={-1}
+            className="checkout-panel relative z-10 w-full max-w-[620px] rounded-[24px] bg-[#fefefe] shadow-2xl overflow-hidden border border-[#deded5] my-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#e8e5dc] px-7 py-5 bg-[#faf9f5]">
+            <div className="flex items-center justify-between border-b border-[#deded5] px-7 py-5 bg-[#faf9f5]">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -98,19 +106,19 @@ export function CheckoutModal() {
                     closeCheckout();
                     openCart();
                   }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2ded4] text-[#6e7a70] hover:text-[#101c14] transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2ded4] text-[#6e7a70] hover:text-[#1e3232] transition"
                   title="Return to cart"
                 >
                   <ArrowLeft size={16} />
                 </button>
                 <div>
-                  <h3 className="text-lg font-bold text-[#101c14]">Delivery & Checkout</h3>
+                  <h3 className="text-lg font-bold text-[#1e3232]">Delivery & Checkout</h3>
                   <p className="text-[11px] text-[#6e7a70]">Direct wholesale dispatch across Nigeria</p>
                 </div>
               </div>
               <button
                 onClick={closeCheckout}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2ded4] text-[#6e7a70] hover:text-[#101c14] transition"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2ded4] text-[#6e7a70] hover:text-[#1e3232] transition"
                 aria-label="Close checkout"
               >
                 <X size={16} />
@@ -129,7 +137,7 @@ export function CheckoutModal() {
             <form onSubmit={handleSubmit} className="p-7 space-y-6">
               {/* Customer Contact */}
               <div>
-                <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#143522] mb-3">
+                <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#1e3232] mb-3">
                   1. Contact Information
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -171,7 +179,7 @@ export function CheckoutModal() {
 
               {/* Delivery Address */}
               <div>
-                <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#143522] mb-3">
+                <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#1e3232] mb-3">
                   2. Warehouse / Delivery Destination
                 </h4>
                 <div className="space-y-3">
@@ -228,10 +236,10 @@ export function CheckoutModal() {
               </div>
 
               {/* Order Breakdown Box */}
-              <div className="rounded-2xl border border-[#e8e5dc] bg-[#faf9f5] p-4 text-xs space-y-2">
+              <div className="rounded-2xl border border-[#deded5] bg-[#faf9f5] p-4 text-xs space-y-2">
                 <div className="flex justify-between font-medium text-[#6e7a70]">
                   <span>Items total ({items.length} produce types)</span>
-                  <span className="font-bold text-[#101c14]">{naira(subtotalNgn)}</span>
+                  <span className="font-bold text-[#1e3232]">{naira(subtotalNgn)}</span>
                 </div>
                 {discountNgn > 0 && (
                   <div className="flex justify-between text-[#069f7d] font-semibold">
@@ -243,14 +251,14 @@ export function CheckoutModal() {
                   <span>Wholesale delivery</span>
                   <span className="text-[#069f7d] font-bold">Complimentary</span>
                 </div>
-                <div className="border-t border-[#e2ded4] pt-2 flex justify-between items-center text-[15px] font-bold text-[#101c14]">
+                <div className="border-t border-[#e2ded4] pt-2 flex justify-between items-center text-[15px] font-bold text-[#1e3232]">
                   <span>Amount to pay</span>
-                  <span className="text-[#143522] text-lg">{naira(totalNgn)}</span>
+                  <span className="text-[#1e3232] text-lg">{naira(totalNgn)}</span>
                 </div>
               </div>
 
               {/* Paystack Test Info Pill */}
-              <div className="flex items-start gap-2.5 rounded-xl bg-[#eaf4ec] p-3 text-[11px] text-[#143522] border border-[#cbe3cf]">
+              <div className="flex items-start gap-2.5 rounded-xl bg-[#eaf4ec] p-3 text-[11px] text-[#1e3232] border border-[#cbe3cf]">
                 <ShieldCheck size={16} className="text-[#069f7d] shrink-0 mt-0.5" />
                 <p>
                   <strong>Paystack Test Mode:</strong> You can pay using test debit card{" "}

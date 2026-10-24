@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   if (await isAdmin()) redirect("/admin");
-  return <AdminLogin />;
+  return <AdminLogin showDemoAccess={process.env.NODE_ENV !== "production" && !process.env.ADMIN_PASSWORD} />;
 }

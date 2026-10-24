@@ -28,17 +28,17 @@ export function QuantityEstimate({
   };
 
   return (
-    <div className="mt-8 rounded-[24px] border border-[#e2ded4] bg-[#fdfdfb] p-6 shadow-sm">
+    <div className="quantity-panel mt-8 rounded-[24px] border border-[#e2ded4] bg-[#fdfdfb] p-6 shadow-sm">
       <div className="flex items-center justify-between pb-4 border-b border-[#eeeae0]">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#069f7d]">
-            Wholesale Quantity Selector
+            Make it your order
           </span>
           <p className="text-[12px] text-[#6e7a70] mt-0.5">
-            Select exact kilograms for batch dispatch
+            Choose the quantity for your next batch
           </p>
         </div>
-        <span className="text-[11px] font-semibold text-[#143522] bg-[#eaf4ec] px-3 py-1 rounded-full">
+        <span className="text-[11px] font-semibold text-[#1e3232] bg-[#eaf4ec] px-3 py-1 rounded-full">
           Min: {product.minOrderKg} kg
         </span>
       </div>
@@ -50,14 +50,14 @@ export function QuantityEstimate({
             type="button"
             disabled={!canOrder || qty <= product.minOrderKg}
             onClick={() => setQty((v) => Math.max(product.minOrderKg, v - 1))}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#dcd7cb] bg-white text-[#101c14] hover:bg-[#f5f2ea] disabled:opacity-30 transition"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#dcd7cb] bg-white text-[#1e3232] hover:bg-[#f5f2ea] disabled:opacity-30 transition"
             aria-label="Decrease quantity"
           >
             <Minus size={16} />
           </button>
 
           <div className="flex flex-col items-center">
-            <span className="min-w-[70px] text-center text-2xl font-bold tracking-tight text-[#101c14]">
+            <span className="min-w-[70px] text-center text-2xl font-bold tracking-tight text-[#1e3232]">
               {canOrder ? qty : 0}
             </span>
             <span className="text-[10px] uppercase font-bold text-[#6e7a70]">Kilograms</span>
@@ -67,7 +67,7 @@ export function QuantityEstimate({
             type="button"
             disabled={!canOrder || qty >= product.stockKg}
             onClick={() => setQty((v) => Math.min(product.stockKg, v + 1))}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#dcd7cb] bg-white text-[#101c14] hover:bg-[#f5f2ea] disabled:opacity-30 transition"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#dcd7cb] bg-white text-[#1e3232] hover:bg-[#f5f2ea] disabled:opacity-30 transition"
             aria-label="Increase quantity"
           >
             <Plus size={16} />
@@ -76,7 +76,7 @@ export function QuantityEstimate({
 
         <div className="text-right">
           <p className="text-[11px] font-medium text-[#6e7a70]">Subtotal ({qty}kg)</p>
-          <p className="text-[26px] font-bold tracking-tight text-[#143522]">
+          <p className="text-[26px] font-bold tracking-tight text-[#1e3232]">
             {naira(canOrder ? qty * product.priceNgn : 0)}
           </p>
         </div>
@@ -116,7 +116,7 @@ export function QuantityEstimate({
 
       <div className="mt-4 flex items-center gap-2 pt-3 border-t border-[#eeeae0] text-[11px] text-[#6e7a70]">
         <ShieldCheck size={14} className="text-[#069f7d]" />
-        <span>Paystack test card enabled · Stock deducted upon verified confirmation</span>
+        <span>Secure checkout through Paystack · Whole-kilogram quantities</span>
       </div>
     </div>
   );

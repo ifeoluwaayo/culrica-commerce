@@ -4,9 +4,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, Leaf, Sparkles, ArrowLeft } from "lucide-react";
+import { Brand } from "./brand";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, ArrowLeft } from "lucide-react";
 
-export function AdminLogin() {
+export function AdminLogin({ showDemoAccess = false }: { showDemoAccess?: boolean }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
@@ -35,9 +36,9 @@ export function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#f9f8f4]">
+    <div className="merchant-login min-h-screen grid lg:grid-cols-2 bg-[#f3f1ea]">
       {/* Left Column: Visual Storytelling */}
-      <div className="relative hidden lg:flex flex-col justify-between p-12 bg-[#143522] text-white overflow-hidden">
+      <div className="relative hidden lg:flex flex-col justify-between p-12 bg-[#1e3232] text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/login-hands.jpg"
@@ -47,27 +48,22 @@ export function AdminLogin() {
             className="object-cover opacity-60"
             sizes="50vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0c2014] via-[#143522]/70 to-[#143522]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#152525] via-[#1e3232]/70 to-[#1e3232]/40" />
         </div>
 
         {/* Top Header */}
         <div className="relative z-10 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 text-2xl font-bold tracking-tight">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md text-white">
-              <Leaf size={20} className="text-[#2bc59e]" />
-            </span>
-            <span className="font-serif-custom text-[26px]">culrica<span className="text-[#2bc59e]">.</span></span>
-          </Link>
-          <span className="rounded-full bg-white/10 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-[#2bc59e] border border-white/15">
+          <Brand />
+          <span className="rounded-full bg-white/10 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-[#a0d8c3] border border-white/15">
             Merchant Workspace
           </span>
         </div>
 
         {/* Bottom Editorial Quote */}
         <div className="relative z-10 max-w-[480px] space-y-4">
-          <span className="eyebrow text-[#2bc59e]">Operating System</span>
+          <span className="eyebrow text-[#a0d8c3]">Your commerce workspace</span>
           <h2 className="font-serif-custom text-3xl font-normal leading-snug">
-            Precision control over African agro commodities, inventory reserves & wholesale orders.
+            Good business starts with <em className="font-serif not-italic">a better connection.</em>
           </h2>
           <div className="flex items-center gap-4 text-xs text-white/70 pt-2 border-t border-white/15">
             <span>Real-time stock sync</span>
@@ -84,35 +80,34 @@ export function AdminLogin() {
         <div className="flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6e7a70] hover:text-[#101c14] transition"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6e7a70] hover:text-[#1e3232] transition"
           >
             <ArrowLeft size={15} /> Back to Storefront
           </Link>
 
           <div className="lg:hidden">
-            <Link href="/" className="font-serif-custom text-xl font-bold text-[#143522]">
-              culrica.
-            </Link>
+            <Brand />
           </div>
         </div>
 
         <div className="mx-auto w-full max-w-[420px] py-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf4ec] text-[#143522] mb-6 shadow-2xs">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eaf4ec] text-[#1e3232] mb-6 shadow-2xs">
             <LockKeyhole size={22} className="text-[#069f7d]" />
           </div>
 
-          <h1 className="font-serif-custom text-[32px] sm:text-[38px] font-bold tracking-tight text-[#101c14]">
-            Merchant Sign In
+          <h1 className="font-serif-custom text-[32px] sm:text-[38px] font-bold tracking-tight text-[#1e3232]">
+            Welcome back.
           </h1>
           <p className="mt-2 text-[14px] text-[#6e7a70]">
-            Enter your merchant password to manage catalogue, adjust inventory, confirm orders, and configure discounts.
+            Your products, orders and next opportunities are waiting. Sign in to your merchant workspace.
           </p>
 
           <form onSubmit={submit} className="mt-8 space-y-5">
             <div>
-              <label className="label-form">Admin Password</label>
+              <label htmlFor="workspace-password" className="label-form">Workspace password</label>
               <div className="relative">
                 <input
+                  id="workspace-password"
                   autoFocus
                   required
                   type={show ? "text" : "password"}
@@ -126,7 +121,7 @@ export function AdminLogin() {
                   type="button"
                   aria-label={show ? "Hide password" : "Show password"}
                   onClick={() => setShow(!show)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8e9c90] hover:text-[#101c14] transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8e9c90] hover:text-[#1e3232] transition"
                 >
                   {show ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
@@ -148,16 +143,16 @@ export function AdminLogin() {
                 <span>Verifying credentials...</span>
               ) : (
                 <>
-                  <span>Access Admin Workspace</span>
+                  <span>Enter your workspace</span>
                   <ArrowRight size={17} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Development Hint Box */}
-          <div className="mt-8 rounded-2xl bg-[#f0ece1] border border-[#e2ded4] p-4 text-xs text-[#546256] space-y-2">
-            <div className="flex items-center gap-2 font-bold text-[#143522]">
+          {/* Only show the default credential when the server uses it. */}
+          {showDemoAccess && <div className="mt-8 rounded-2xl bg-[#f0ece1] border border-[#e2ded4] p-4 text-xs text-[#546256] space-y-2">
+            <div className="flex items-center gap-2 font-bold text-[#1e3232]">
               <ShieldCheck size={16} className="text-[#069f7d]" />
               <span>Development Demo Access</span>
             </div>
@@ -166,17 +161,17 @@ export function AdminLogin() {
               <button
                 type="button"
                 onClick={() => setPassword("culrica-demo-2026")}
-                className="font-mono bg-white px-2 py-0.5 rounded border border-[#dcd7cb] font-bold text-[#143522] hover:bg-[#eaf4ec] transition inline-flex items-center gap-1 cursor-pointer"
+                className="font-mono bg-white px-2 py-0.5 rounded border border-[#dcd7cb] font-bold text-[#1e3232] hover:bg-[#eaf4ec] transition inline-flex items-center gap-1 cursor-pointer"
                 title="Click to fill demo password"
               >
                 culrica-demo-2026
               </button>
             </p>
-          </div>
+          </div>}
         </div>
 
         <div className="text-center text-xs text-[#8e9c90]">
-          © 2026 Culrica Commerce · TSG Labs Partner Demonstration
+          © 2026 Culrica · Your business, connected.
         </div>
       </div>
     </div>

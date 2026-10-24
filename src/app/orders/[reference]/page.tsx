@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { productImage } from "@/lib/products";
 import Link from "next/link";
 import { CheckCircle2, Clock, Truck, Package, AlertCircle, ArrowLeft, ShieldCheck, MapPin, CreditCard } from "lucide-react";
 import { orderBy } from "@/lib/orders";
@@ -24,21 +25,21 @@ export default async function OrderDetailPage({
   const isCancelled = order.status === "cancelled";
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f9f8f4]">
+    <div className="flex min-h-screen flex-col bg-[#f3f1ea]">
       <SiteHeader />
 
-      <main className="flex-1 py-12 lg:py-20">
+      <main id="main-content" className="order-surface flex-1 py-12 lg:py-20">
         <div className="container-main max-w-[880px]">
           {/* Top back link */}
           <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-[#6e7a70] hover:text-[#101c14] transition"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-[#6e7a70] hover:text-[#1e3232] transition"
             >
               <ArrowLeft size={15} /> Back to Storefront
             </Link>
 
-            <span className="font-mono text-xs font-bold text-[#143522] bg-[#f0ece1] px-3 py-1 rounded-full">
+            <span className="font-mono text-xs font-bold text-[#1e3232] bg-[#f0ece1] px-3 py-1 rounded-full">
               Order #{order.reference}
             </span>
           </div>
@@ -46,11 +47,11 @@ export default async function OrderDetailPage({
           {/* Main Card */}
           <div className="overflow-hidden rounded-[32px] border border-[#e2ded4] bg-white shadow-xl">
             {/* Order Status Banner */}
-            <div className="border-b border-[#e8e5dc] bg-[#faf9f5] p-6 sm:p-8">
+            <div className="border-b border-[#deded5] bg-[#faf9f5] p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="eyebrow text-[#069f7d]">Order Tracking & Summary</span>
-                  <h1 className="font-serif-custom text-[28px] sm:text-[34px] font-bold text-[#101c14] mt-1">
+                  <h1 className="font-serif-custom text-[28px] sm:text-[34px] font-bold text-[#1e3232] mt-1">
                     Order Status: {statusLabel[order.status]}
                   </h1>
                   <p className="text-xs text-[#6e7a70] mt-1">
@@ -99,7 +100,7 @@ export default async function OrderDetailPage({
                         <div
                           className={`flex h-9 w-9 items-center justify-center rounded-full mb-2 transition ${
                             isCompleted
-                              ? "bg-[#143522] text-white"
+                              ? "bg-[#1e3232] text-white"
                               : "bg-[#f0ece1] text-[#a5b2a7]"
                           }`}
                         >
@@ -108,9 +109,9 @@ export default async function OrderDetailPage({
                         <span
                           className={`font-semibold text-[11px] ${
                             isCurrent
-                              ? "text-[#143522] font-bold"
+                              ? "text-[#1e3232] font-bold"
                               : isCompleted
-                              ? "text-[#143522]"
+                              ? "text-[#1e3232]"
                               : "text-[#a5b2a7]"
                           }`}
                         >
@@ -129,7 +130,7 @@ export default async function OrderDetailPage({
                 <div className="flex items-center gap-3">
                   <AlertCircle size={20} className="text-amber-600 shrink-0" />
                   <div>
-                    <h3 className="text-sm font-bold text-[#101c14]">Payment Pending</h3>
+                    <h3 className="text-sm font-bold text-[#1e3232]">Payment Pending</h3>
                     <p className="text-xs text-[#6e7a70]">
                       Complete your Paystack test payment to confirm order and guarantee stock.
                     </p>
@@ -145,17 +146,17 @@ export default async function OrderDetailPage({
                 Ordered Produce Lines
               </h2>
 
-              <div className="divide-y divide-[#eeeae0] rounded-2xl border border-[#e8e5dc] overflow-hidden">
+              <div className="divide-y divide-[#eeeae0] rounded-2xl border border-[#deded5] overflow-hidden">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-4 bg-white hover:bg-[#faf9f5]">
                     <div className="flex items-center gap-4">
                       {item.imageSrc && (
-                        <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-[#f0ece1] shrink-0 border border-[#e8e5dc]">
-                          <Image src={item.imageSrc} alt={item.name} fill className="object-cover" />
+                        <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-[#f0ece1] shrink-0 border border-[#deded5]">
+                          <Image src={productImage(item.imageSrc)} alt={item.name} fill className="object-cover" />
                         </div>
                       )}
                       <div>
-                        <h3 className="text-sm font-bold text-[#101c14]">{item.name}</h3>
+                        <h3 className="text-sm font-bold text-[#1e3232]">{item.name}</h3>
                         <p className="text-xs text-[#6e7a70]">
                           SKU: {item.sku} · {naira(item.priceNgn)}/kg
                         </p>
@@ -163,8 +164,8 @@ export default async function OrderDetailPage({
                     </div>
 
                     <div className="text-right">
-                      <p className="text-xs font-bold text-[#143522]">{item.quantityKg} kg</p>
-                      <p className="text-sm font-bold text-[#101c14] mt-0.5">{naira(item.lineTotalNgn)}</p>
+                      <p className="text-xs font-bold text-[#1e3232]">{item.quantityKg} kg</p>
+                      <p className="text-sm font-bold text-[#1e3232] mt-0.5">{naira(item.lineTotalNgn)}</p>
                     </div>
                   </div>
                 ))}
@@ -172,10 +173,10 @@ export default async function OrderDetailPage({
 
               {/* Financial Totals */}
               <div className="mt-6 flex justify-end">
-                <div className="w-full sm:w-[320px] rounded-2xl bg-[#faf9f5] border border-[#e8e5dc] p-5 space-y-2.5 text-xs">
+                <div className="w-full sm:w-[320px] rounded-2xl bg-[#faf9f5] border border-[#deded5] p-5 space-y-2.5 text-xs">
                   <div className="flex justify-between text-[#6e7a70]">
                     <span>Produce Subtotal</span>
-                    <span className="font-semibold text-[#101c14]">{naira(order.subtotalNgn)}</span>
+                    <span className="font-semibold text-[#1e3232]">{naira(order.subtotalNgn)}</span>
                   </div>
                   {order.discountNgn > 0 && (
                     <div className="flex justify-between text-[#069f7d] font-semibold">
@@ -189,9 +190,9 @@ export default async function OrderDetailPage({
                       {order.deliveryNgn > 0 ? naira(order.deliveryNgn) : "Free"}
                     </span>
                   </div>
-                  <div className="border-t border-[#eeeae0] pt-2 flex justify-between items-center text-[16px] font-bold text-[#101c14]">
+                  <div className="border-t border-[#eeeae0] pt-2 flex justify-between items-center text-[16px] font-bold text-[#1e3232]">
                     <span>Total Amount</span>
-                    <span className="text-[#143522]">{naira(order.totalNgn)}</span>
+                    <span className="text-[#1e3232]">{naira(order.totalNgn)}</span>
                   </div>
                 </div>
               </div>
@@ -200,7 +201,7 @@ export default async function OrderDetailPage({
               <div className="mt-8 grid sm:grid-cols-2 gap-6 pt-6 border-t border-[#eeeae0] text-xs">
                 <div>
                   <h3 className="font-bold uppercase tracking-wider text-[#6e7a70] mb-2">Customer Details</h3>
-                  <div className="space-y-1 text-[#101c14]">
+                  <div className="space-y-1 text-[#1e3232]">
                     <p className="font-bold">{order.customerName}</p>
                     <p>{order.customerEmail}</p>
                     <p>{order.customerPhone}</p>
@@ -209,7 +210,7 @@ export default async function OrderDetailPage({
 
                 <div>
                   <h3 className="font-bold uppercase tracking-wider text-[#6e7a70] mb-2">Delivery Address</h3>
-                  <div className="space-y-1 text-[#101c14]">
+                  <div className="space-y-1 text-[#1e3232]">
                     <p>{order.shippingAddress}</p>
                     <p>{order.shippingCity}, {order.shippingState}</p>
                     {order.notes && <p className="text-[#6e7a70] italic mt-1">Notes: {order.notes}</p>}

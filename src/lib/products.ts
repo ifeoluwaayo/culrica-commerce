@@ -28,6 +28,16 @@ export type Product = {
   updatedAt: string;
 };
 
+/** Upgrade original bundled illustrations while preserving merchant-supplied images. */
+export function productImage(src: string): string {
+  const photography: Record<string, string> = {
+    "/products/hibiscus.svg": "/products/hibiscus.jpg",
+    "/products/ginger.svg": "/products/ginger.jpg",
+    "/products/sesame.svg": "/products/sesame.jpg"
+  };
+  return photography[src] ?? src;
+}
+
 /** Default photography per category, used when an admin does not supply an image URL. */
 export const imageForCategory = (category: Category) => {
   switch (category) {
